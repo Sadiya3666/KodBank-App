@@ -12,14 +12,15 @@ const TransactionHistory = ({ onBack, limit = null, showViewAll = false }) => {
     total: 0
   });
 
+  // const [isSearching, setIsSearching] = useState(false); // Unused state removed to fix lint error
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
 
   const fetchTransactions = async (offset = 0, search = '') => {
     try {
       setLoading(true);
       let response;
       if (search) {
+        // setIsSearching(true); // Removed usage of unused state
         response = await bankService.searchTransactions({ q: search, limit: pagination.limit, offset });
       } else {
         response = await bankService.getTransactionHistory({
@@ -39,6 +40,7 @@ const TransactionHistory = ({ onBack, limit = null, showViewAll = false }) => {
       setError(error.message || 'Failed to fetch transactions');
     } finally {
       setLoading(false);
+      // setIsSearching(false); // Removed usage of unused state
     }
   };
 
@@ -54,6 +56,7 @@ const TransactionHistory = ({ onBack, limit = null, showViewAll = false }) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchTransactions();
   }, []);
 

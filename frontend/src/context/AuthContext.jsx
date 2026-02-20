@@ -18,7 +18,42 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tokenRefreshTimer, setTokenRefreshTimer] = useState(null);
+  const [showSessionWarning, setShowSessionWarning] = useState(false);
+  const tokenRefreshTimerRef = React.useRef(null);
+
+  // Clear auth data
+  const clearAuthData = useCallback(() => {
+    setUser(null);
+    setToken(null);
+    setError(null);
+    authService.clearAuthData();
+
+    if (tokenRefreshTimerRef.current) {
+      tokenService.clearTokenRefreshTimer(tokenRefreshTimerRef.current);
+      tokenRefreshTimerRef.current = null;
+    }
+  }, []);
+
+  // Handle token expiry
+  const handleTokenExpiry = useCallback(() => {
+    console.warn('Token is about to expire or has expired');
+    setShowSessionWarning(false);
+    clearAuthData();
+    window.location.href = '/login?session=expired';
+  }, [clearAuthData]);
+
+  // Setup token refresh timer
+  const setupTokenRefreshTimer = useCallback((token) => {
+    if (tokenRefreshTimerRef.current) {
+      tokenService.clearTokenRefreshTimer(tokenRefreshTimerRef.current);
+    }
+
+    const timerId = tokenService.setupTokenRefreshTimer(() => {
+      handleTokenExpiry();
+    });
+
+    tokenRefreshTimerRef.current = timerId;
+  }, [handleTokenExpiry]);
 
   // Initialize auth state
   useEffect(() => {
@@ -63,30 +98,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
-
-  // Setup token refresh timer
-  const setupTokenRefreshTimer = (token) => {
-    if (tokenRefreshTimer) {
-      tokenService.clearTokenRefreshTimer(tokenRefreshTimer);
-    }
-
-    const timerId = tokenService.setupTokenRefreshTimer(() => {
-      handleTokenExpiry();
-    });
-
-    setTokenRefreshTimer(timerId);
-  };
-
-  const [showSessionWarning, setShowSessionWarning] = useState(false);
-
-  // Handle token expiry
-  const handleTokenExpiry = useCallback(() => {
-    console.warn('Token is about to expire or has expired');
-    setShowSessionWarning(false);
-    clearAuthData();
-    window.location.href = '/login?session=expired';
-  }, []);
+  }, [clearAuthData, setupTokenRefreshTimer]);
 
   // Check session expiry frequently
   useEffect(() => {
@@ -112,19 +124,6 @@ export const AuthProvider = ({ children }) => {
     const interval = setInterval(checkExpiry, 10000); // Check every 10 seconds
     return () => clearInterval(interval);
   }, [token, showSessionWarning, handleTokenExpiry]);
-
-  // Clear auth data
-  const clearAuthData = useCallback(() => {
-    setUser(null);
-    setToken(null);
-    setError(null);
-    authService.clearAuthData();
-
-    if (tokenRefreshTimer) {
-      tokenService.clearTokenRefreshTimer(tokenRefreshTimer);
-      setTokenRefreshTimer(null);
-    }
-  }, [tokenRefreshTimer]);
 
   // Login function
   const login = useCallback(async (email, password) => {
@@ -154,7 +153,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setupTokenRefreshTimer]);
 
   // Signup function
   const signup = useCallback(async (name, email, password) => {
@@ -232,11 +231,11 @@ export const AuthProvider = ({ children }) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (tokenRefreshTimer) {
-        tokenService.clearTokenRefreshTimer(tokenRefreshTimer);
+      if (tokenRefreshTimerRef.current) {
+        tokenService.clearTokenRefreshTimer(tokenRefreshTimerRef.current);
       }
     };
-  }, [tokenRefreshTimer]);
+  }, []);
 
   const value = {
     // State

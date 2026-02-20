@@ -13,7 +13,7 @@ import SessionWarning from '../Common/SessionWarning';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
-  const { balance } = useBalance();
+  // const { balance } = useBalance(); // Unused variable removed to fix lint error
   const [activeSection, setActiveSection] = useState('overview');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
@@ -27,13 +27,16 @@ const Dashboard = () => {
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2
-    }).format(amount);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
+
+  // Unused formatCurrency function removed
 
   return (
     <div className="dashboard-container">

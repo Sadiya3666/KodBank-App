@@ -1,4 +1,4 @@
-import { useContext, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 
 // Custom hook for authentication
@@ -35,7 +35,7 @@ export const useAuth = () => {
   // Helper function to get user initials
   const getUserInitials = useCallback(() => {
     if (!user?.name) return 'U';
-    
+
     const names = user.name.split(' ');
     if (names.length >= 2) {
       return names[0][0] + names[names.length - 1][0];
@@ -46,7 +46,7 @@ export const useAuth = () => {
   // Helper function to format user creation date
   const getMemberSince = useCallback(() => {
     if (!user?.created_at) return null;
-    
+
     return new Date(user.created_at).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -66,7 +66,7 @@ export const useAuth = () => {
     loading,
     error,
     isAuthenticated,
-    
+
     // Auth actions
     login,
     signup,
@@ -74,19 +74,19 @@ export const useAuth = () => {
     updateUser,
     refreshUser,
     clearAuthData,
-    
+
     // User info helpers
     getDisplayName,
     getUserInitials,
     getMemberSince,
     getUserRole,
     hasRole,
-    
+
     // Token helpers
     refreshToken,
     isTokenExpired,
     getTokenExpiration,
-    
+
     // Error handling
     setError,
     clearError
