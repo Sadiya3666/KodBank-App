@@ -56,8 +56,8 @@ const TransactionHistory = ({ onBack, limit = null, showViewAll = false }) => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatCurrency = (amount) => {

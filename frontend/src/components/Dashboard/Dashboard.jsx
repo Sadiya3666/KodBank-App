@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useBalance } from '../../hooks/useBalance';
+// import { useBalance } from '../../hooks/useBalance'; // Removed unused import
 import CheckBalance from './CheckBalance';
 import TransferMoney from './TransferMoney';
 import DepositMoney from './DepositMoney';
